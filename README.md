@@ -50,10 +50,11 @@ This Express.js application is a contact form backend that processes POST reques
 
 	```json
 	{
+		"name": "Sender Name",
 		"email": "sender@example.com",
+		"subject": "Message Subject",
 		"message": "Hello, this is a test message.",
-		"address_to": "recipient@example.com",
-		"name": "Sender Name"
+		"address_to": "recipient@example.com"
 	}
 	```
 
@@ -64,11 +65,11 @@ This Express.js application is a contact form backend that processes POST reques
 Send a message via email.
 
 #### Request Body
-
-- `email` (string): The sender's email address.
-- `message` (string): The message content.
-- `address_to` (string): The recipient's email address.
-- `name` (string): The sender's name.
+- `name` (string, required): The sender's name.
+- `email` (string, required): The sender's email address.
+- `subject` (string, optional): The subject of the message.
+- `message` (string, required): The message content.
+- `address_to` (string, required): The recipient's email address.
 
 #### Response
 
@@ -96,10 +97,11 @@ Send a message via email.
 
 	```json
 	{
+		"name": "Sender Name",
 		"email": "sender@example.com",
+		"subject": "Message Subject",
 		"message": "Hello, this is a test message.",
-		"address_to": "recipient@example.com",
-		"name": "Sender Name"
+		"address_to": "recipient@example.com"
 	}
 	```
 
@@ -124,6 +126,9 @@ This script will:
 - Stop and remove the existing Docker container named `leave-msg-app`.
 - Build a new Docker image.
 - Run a new Docker container with the updated image.
+
+## Contact
+For any questions or to use this API in your application, please contact me at [info@baoopn.com](mailto:info@baoopn.com).
 
 ## License
 
