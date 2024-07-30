@@ -30,10 +30,22 @@ app.use(cors(corsOptions)); // Enable CORS for specific origins
 
 // POST endpoint /msg
 app.post('/msg', async (req, res) => {
-    const { email, message, address_to, name } = req.body;
+    let { subject, email, message, address_to, name } = req.body;
 
     if (!email || !message || !address_to || !name) {
         return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+        return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    if (!address_to.includes('@') || !address_to.includes('.')) {
+        return res.status(400).json({ error: 'Invalid recipient email address' });
+    }
+
+    if (!subject) {
+        subject = '(No Subject)';
     }
 
     // Create a transporter
@@ -57,6 +69,7 @@ app.post('/msg', async (req, res) => {
         html: `
             <p>You have received a new message from <strong>${name}</strong> (<strong>${email}</strong>):</p>
             <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                <p><strong>Subject:</strong> ${subject}</p>
                 <p>${message}</p>
             </div>
             <p>Best regards,<br>Admin</p>
