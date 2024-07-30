@@ -10,7 +10,7 @@ const port = 3000;
 // List of allowed origins
 const allowedOrigins = [
     'https://example1.com',
-    'https://example2.com'
+	'https://example2.com'
 ];
 
 // CORS options
@@ -56,14 +56,16 @@ app.get('/', (req, res) => {
                     success: "Email sent successfully"
                 },
                 errorResponses: {
-                    400: {
-                        error: "Missing required fields",
-                        description: "One or more required fields are missing from the request body."
-                    },
-                    400: {
-                        error: "Invalid email address",
-                        description: "The provided email address is not in a valid format."
-                    },
+                    400: [
+                        {
+                            error: "Missing required fields",
+                            description: "One or more required fields are missing from the request body."
+                        },
+                        {
+                            error: "Invalid email address",
+                            description: "The provided email address is not in a valid format."
+                        }
+                    ],
                     500: {
                         error: "Failed to send email",
                         description: "There was an error while attempting to send the email."
