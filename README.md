@@ -1,6 +1,6 @@
 # Leave Message API
 
-This is a simple Express.js application that allows users to send messages via email. The application captures the URL of the page from which the request is sent and includes it in the email.
+This Express.js application is a contact form backend that processes POST requests to the /msg endpoint. It validates input data, allows cross-origin requests from specific origins, and sends an email containing the message details using Gmail's SMTP server. The app ensures secure and efficient handling of contact form submissions, providing real-time email notifications to the specified recipient.
 
 ## Features
 
