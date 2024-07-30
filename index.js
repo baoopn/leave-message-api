@@ -28,6 +28,53 @@ const corsOptions = {
 app.use(bodyParser.json());
 app.use(cors(corsOptions)); // Enable CORS for specific origins
 
+// GET endpoint for documentation
+app.get('/', (req, res) => {
+    res.json({
+        message: "Welcome to the Leave Message API",
+        description: "This API allows you to send messages via email. Use the POST endpoint to submit your message, and the API will handle the rest.",
+        endpoints: {
+            postMessage: {
+                method: "POST",
+                path: "/msg",
+                description: "Send a message via email",
+                body: {
+                    subject: "string (optional) - The subject of the email. If not provided, '(No Subject)' will be used.",
+                    email: "string (required) - The email address of the sender. Must be a valid email format.",
+                    message: "string (required) - The content of the message to be sent.",
+                    address_to: "string (required) - The recipient's email address. Must be a valid email format.",
+                    name: "string (required) - The name of the sender."
+                },
+                exampleRequest: {
+                    subject: "Hello",
+                    email: "sender@example.com",
+                    message: "This is a test message.",
+                    address_to: "recipient@example.com",
+                    name: "Sender Name"
+                },
+                exampleResponse: {
+                    success: "Email sent successfully"
+                },
+                errorResponses: {
+                    400: {
+                        error: "Missing required fields",
+                        description: "One or more required fields are missing from the request body."
+                    },
+                    400: {
+                        error: "Invalid email address",
+                        description: "The provided email address is not in a valid format."
+                    },
+                    500: {
+                        error: "Failed to send email",
+                        description: "There was an error while attempting to send the email."
+                    }
+                }
+            }
+        }
+    });
+});
+
+
 // POST endpoint /msg
 app.post('/msg', async (req, res) => {
     let { subject, email, message, address_to, name } = req.body;
