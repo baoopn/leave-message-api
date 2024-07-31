@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
+import timeout from 'connect-timeout';
 import { EMAIL_USER, EMAIL_FROM, PASSWORD } from './constants.js';
 
 const app = express();
@@ -27,9 +28,15 @@ const corsOptions = {
 // Middleware
 app.use(bodyParser.json());
 app.use(cors(corsOptions)); // Enable CORS for specific origins
+app.use(timeout('10s')); // Set a timeout of 10 seconds
+
+// Middleware to handle timeout
+function haltOnTimedout(req, res, next) {
+    if (!req.timedout) next();
+}
 
 // GET endpoint for documentation
-app.get('/', (req, res) => {
+app.get('/', haltOnTimedout, (req, res) => {
     res.json({
         message: "Welcome to the Leave Message API",
         description: "This API allows you to send messages via email. Use the POST endpoint to submit your message, and the API will handle the rest.",
@@ -76,9 +83,8 @@ app.get('/', (req, res) => {
     });
 });
 
-
 // POST endpoint /msg
-app.post('/msg', async (req, res) => {
+app.post('/msg', haltOnTimedout, async (req, res) => {
     let { subject, email, message, address_to, name } = req.body;
 
     if (!email || !message || !address_to || !name) {
@@ -129,7 +135,7 @@ app.post('/msg', async (req, res) => {
     try {
         // Send email
         await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully. Timestamp: ${new Date().toISOString()}`);
+        console.log(`Email sent successfully to ${address_to}. Timestamp: ${new Date().toISOString()}`);
         res.status(200).json({ success: 'Email sent successfully' });
     } catch (error) {
         console.error('Error sending email:', error);
