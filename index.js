@@ -1,17 +1,18 @@
-import express from 'express';
+import express, { response } from 'express';
 import bodyParser from 'body-parser';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
+import xss from 'xss-clean';
 import timeout from 'connect-timeout';
-import { EMAIL_USER, EMAIL_FROM, PASSWORD } from './constants.js';
+import fetch from 'node-fetch'; 
+import { EMAIL_USER, EMAIL_FROM, PASSWORD, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
 
 const app = express();
 const port = 3000;
 
 // List of allowed origins
 const allowedOrigins = [
-    'https://example1.com',
-	'https://example2.com'
+    'https://example.com',
 ];
 
 // CORS options
@@ -28,6 +29,7 @@ const corsOptions = {
 // Middleware
 app.use(bodyParser.json());
 app.use(cors(corsOptions)); // Enable CORS for specific origins
+app.use(xss()); // Protect from XSS attacks
 app.use(timeout('10s')); // Set a timeout of 10 seconds
 
 // Middleware to handle timeout
@@ -76,6 +78,42 @@ app.get('/', haltOnTimedout, (req, res) => {
                     500: {
                         error: "Failed to send email",
                         description: "There was an error while attempting to send the email."
+                    }
+                }
+            },
+            postMessageTelegram: {
+                method: "POST",
+                path: "/msg/telegram",
+                description: "Send a message via Telegram",
+                body: {
+                    subject: "string (optional) - The subject of the message. If not provided, '(No Subject)' will be used.",
+                    email: "string (required) - The email address of the sender.",
+                    message: "string (required) - The content of the message to be sent.",
+                    name: "string (required) - The name of the sender."
+                },
+                exampleRequest: {
+                    subject: "Test Subject",
+                    email: "sender@example.com",
+                    message: "This is a test message for Telegram.",
+                    name: "Sender Name"
+                },
+                exampleResponse: {
+                    success: "Telegram message sent successfully"
+                },
+                errorResponses: {
+                    400: [
+                        {
+                            error: "Missing required fields",
+                            description: "One or more required fields are missing from the request body."
+                        },
+                        {
+                            error: "Invalid email address",
+                            description: "The provided email address is not in a valid format."
+                        }
+                    ],
+                    500: {
+                        error: "Failed to send Telegram message",
+                        description: "There was an error while attempting to send the Telegram message."
                     }
                 }
             }
@@ -135,13 +173,76 @@ app.post('/msg', haltOnTimedout, async (req, res) => {
     try {
         // Send email
         await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${address_to}. Timestamp: ${new Date().toISOString()}`);
+        console.log(`Email sent successfully from ${requestUrl}. Timestamp: ${new Date().toISOString()}`);
         res.status(200).json({ success: 'Email sent successfully' });
     } catch (error) {
         console.error('Error sending email:', error);
         res.status(500).json({ error: 'Failed to send email' });
     }
 });
+
+// POST endpoint /msg/telegram for sending via Telegram
+app.post('/msg/telegram', haltOnTimedout, async (req, res) => {
+    let { subject, email, message, name } = req.body;
+    // Construct request URL
+    const requestUrl = req.get('Referer') || `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+    if (!email || !message || !name) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+        return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    if (!subject) {
+        subject = '(No Subject)';
+    }
+
+    // Function to escape special characters for Telegram MarkdownV2
+    const escapeMarkdown = (text) => {
+        return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
+    };
+
+    const aUrl = 'https://baoopn.com';
+
+    // Construct the Telegram message with Markdown
+    const telegramMessage = `
+You have received a new message from [${escapeMarkdown(requestUrl)}](${escapeMarkdown(requestUrl)}/):
+
+    *Name:* ${escapeMarkdown(name)}
+    *Email:* ${escapeMarkdown(email)}
+    *Subject:* ${escapeMarkdown(subject)}
+
+*Message:*
+${escapeMarkdown(message)}
+`;
+
+    try {
+        console.log(telegramMessage);
+        // Send message to Telegram
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: telegramMessage,
+                parse_mode: 'MarkdownV2'
+            }),
+        });
+
+        if (response.ok) {
+            console.log(`Telegram message sent successfully. From: ${requestUrl}. Timestamp: ${new Date().toISOString()}`);
+            res.status(200).json({ success: 'Telegram message sent successfully' });
+        } else {
+            throw new Error(`Failed to send Telegram message.`);
+        }
+    } catch (error) {
+        console.error('Error sending Telegram message:', error);
+        res.status(500).json({ error: 'Failed to send Telegram message' });
+    }
+});
+
 
 // Start the server
 app.listen(port, () => {
