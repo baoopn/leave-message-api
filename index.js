@@ -204,8 +204,6 @@ app.post('/msg/telegram', haltOnTimedout, async (req, res) => {
         return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
     };
 
-    const aUrl = 'https://baoopn.com';
-
     // Construct the Telegram message with Markdown
     const telegramMessage = `
 You have received a new message from [${escapeMarkdown(requestUrl)}](${escapeMarkdown(requestUrl)}/):
