@@ -6,14 +6,16 @@ import xss from 'xss-clean';
 import timeout from 'connect-timeout';
 import fetch from 'node-fetch'; 
 import { EMAIL_USER, EMAIL_FROM, PASSWORD, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file (for local development)
+// dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// List of allowed origins
-const allowedOrigins = [
-    'https://example.com',
-];
+// Get allowed origins from environment variable
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
 
 // CORS options
 const corsOptions = {
