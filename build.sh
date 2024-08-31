@@ -11,9 +11,9 @@ handle_error_not_exit() {
 }
 
 # Rebuild and start the container
-sudo docker compose up -d --build || handle_error "sudo docker-compose up -d --build"
+docker compose up -d --build || handle_error "sudo docker-compose up -d --build"
 
 # Remove dangling images
-sudo docker image prune -f || handle_error "sudo docker image prune -f"
+docker image prune -f || handle_error "sudo docker image prune -f"
 
 echo "Container has been successfully rebuilt and started."
