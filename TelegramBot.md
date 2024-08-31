@@ -13,7 +13,7 @@
 1. Start a chat with your newly created bot by searching for its username in Telegram and sending a message to it.
 2. Open the following URL in your browser, replacing `YOUR_BOT_TOKEN` with your bot token:
    ```
-https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates
+    https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates
    ```
 3. Look for the `chat` object in the JSON response. The `id` field in this object is your `chatId`.
 
