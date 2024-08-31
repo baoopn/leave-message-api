@@ -1,12 +1,11 @@
-import express, { response } from 'express';
+import express from 'express';
 import bodyParser from 'body-parser';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
 import xss from 'xss-clean';
 import timeout from 'connect-timeout';
-import fetch from 'node-fetch'; 
-import { EMAIL_USER, EMAIL_FROM, PASSWORD, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
-import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+import {EMAIL_FROM, EMAIL_USER, PASSWORD, TELEGRAM_BOT_TOKEN} from './constants.js';
 
 // Load environment variables from .env file (for local development)
 // dotenv.config();
@@ -185,7 +184,7 @@ app.post('/msg', haltOnTimedout, async (req, res) => {
 
 // POST endpoint /msg/telegram for sending via Telegram
 app.post('/msg/telegram', haltOnTimedout, async (req, res) => {
-    let { subject, email, message, name } = req.body;
+    let { subject, email, message, name, chatId } = req.body;
     // Construct request URL
     const requestUrl = req.get('Referer') || `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
@@ -219,13 +218,12 @@ ${escapeMarkdown(message)}
 `;
 
     try {
-        console.log(telegramMessage);
         // Send message to Telegram
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
+                chat_id: chatId,
                 text: telegramMessage,
                 parse_mode: 'MarkdownV2'
             }),
