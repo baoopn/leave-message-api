@@ -9,9 +9,6 @@ services:
       - "${PORT}:${PORT}"  # Map the port specified in the environment variable
     restart: always
     environment:
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_FROM=${EMAIL_FROM}
-      - PASSWORD=${PASSWORD}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - PORT=${PORT}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Leave Message API Instructions</title>
+	<meta name="description" content="Instructions for using the Leave Message API to send messages via Telegram Bot.">
+	<meta name="author" content="Bao Nguyen">
+	<link rel="icon" href="https://cdn.baoopn.com/data/img/Baoo.png" type="image/png">
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container py-5">
+	<h1 class="mb-4">Welcome to the Leave Message API</h1>
+	<p>This API allows you to send messages via Telegram Bot. Use the POST endpoint to submit your message as well as your chat ID, and the API will handle the rest.</p>
+
+	<h2 class="mt-4">Starting the Telegram Bot</h2>
+	<p>To start using the Telegram bot, follow these steps:</p>
+	<ol>
+		<li>Open Telegram and search for <code>@baoopn_msg_bot</code>.</li>
+		<li>Start a chat with the bot by clicking on the <code>Start</code> button or sending the <code>/start</code> command.</li>
+		<li>Use the <code>/chatid</code> command to get your chat ID.</li>
+	</ol>
+	<p>Sample reply from the bot:</p>
+	<pre><code>Your chat ID is: [CHAT_ID]</code></pre>
+	<p>Make sure to copy your chat ID as you will need it to send messages using the API.</p>
+
+	<h2 class="mt-4">Example Use Case</h2>
+	<p>An example of using this API is in a contact form on a website. When a user submits the form, the details are sent to the API, and you get notified in your Telegram chat.</p>
+
+	<h5>Sample JSON</h5>
+	<pre id="sampleJson"><code>{
+    "name": "Sender Name",
+    "email": "Sender Email",
+    "subject": "Test Subject",
+    "message": "This is a test message for Telegram.",
+    "chatId": "your-telegram-chat-id"
+}</code></pre>
+
+	<form id="contactForm">
+		<div class="form-group">
+			<label for="name">Name</label>
+			<input type="text" class="form-control" id="name" required>
+		</div>
+		<div class="form-group">
+			<label for="email">Email</label>
+			<input type="text" class="form-control" id="email" required>
+		</div>
+		<div class="form-group">
+			<label for="subject">Subject</label>
+			<input type="text" class="form-control" id="subject">
+		</div>
+		<div class="form-group">
+			<label for="message">Message</label>
+			<textarea class="form-control" id="message" rows="3" required></textarea>
+		</div>
+		<div class="form-group">
+			<label for="chatId">Chat ID</label>
+			<input type="text" class="form-control" id="chatId" required>
+		</div>
+		<button type="submit" class="btn btn-primary">Send Message</button>
+	</form>
+
+	<h2 class="mt-4">Endpoints</h2>
+	<div class="card mt-3">
+		<div class="card-header">
+			POST /msg/telegram
+		</div>
+		<div class="card-body">
+			<h5 class="card-title">Send a message via Telegram</h5>
+			<p class="card-text">
+				<strong>Method:</strong> POST<br>
+				<strong>Path:</strong> /msg/telegram<br>
+				<strong>Description:</strong> Send a message via Telegram
+			</p>
+			<h5 class="mt-4">Request Body</h5>
+			<ul>
+				<li><strong>subject</strong> (string, optional): The subject of the message. If not provided, '(No Subject)' will be used.</li>
+				<li><strong>message</strong> (string, required): The content of the message to be sent.</li>
+				<li><strong>name</strong> (string, required): The name of the sender.</li>
+				<li><strong>chatId</strong> (string, required): The chat ID of the recipient.</li>
+			</ul>
+			<h5 class="mt-4">Example Request</h5>
+			<pre><code>{
+    "subject": "Test Subject",
+    "message": "This is a test message for Telegram.",
+    "name": "Sender Name",
+    "chatId": "your-telegram-chat-id"
+}</code></pre>
+			<h5 class="mt-4">Example Response</h5>
+			<pre><code>{
+    "success": "Telegram message sent successfully"
+}</code></pre>
+			<h5 class="mt-4">Error Responses</h5>
+			<ul>
+				<li><strong>400 Bad Request</strong>
+					<ul>
+						<li><strong>Missing required fields:</strong> One or more required fields are missing from the request body.</li>
+					</ul>
+				</li>
+				<li><strong>500 Internal Server Error:</strong> Failed to send Telegram message. There was an error while attempting to send the Telegram message.</li>
+			</ul>
+		</div>
+	</div>
+	<div class="mt-4">
+    <p>Contact me at my <a href="https://baoopn.com/#contact">website</a> if you need more information or have any suggestions.</p>
+</div>
+</div>
+<script>
+	function updateSampleJson() {
+		const name = document.getElementById('name').value;
+		const email = document.getElementById('email').value;
+		const subject = document.getElementById('subject').value;
+		const message = document.getElementById('message').value;
+		const chatId = document.getElementById('chatId').value;
+
+		const sampleJson = {
+			name: name || "Sender Name",
+			email: email || "Sender Email",
+			subject: subject || "Test Subject",
+			message: message || "This is a test message for Telegram.",
+			chatId: chatId || "your-telegram-chat-id"
+		};
+
+		document.getElementById('sampleJson').textContent = JSON.stringify(sampleJson, null, 4);
+	}
+
+	document.getElementById('name').addEventListener('input', updateSampleJson);
+	document.getElementById('email').addEventListener('input', updateSampleJson);
+	document.getElementById('subject').addEventListener('input', updateSampleJson);
+	document.getElementById('message').addEventListener('input', updateSampleJson);
+	document.getElementById('chatId').addEventListener('input', updateSampleJson);
+
+	document.getElementById('contactForm').addEventListener('submit', async function(event) {
+		event.preventDefault();
+		const name = document.getElementById('name').value;
+		const email = document.getElementById('email').value;
+		const subject = document.getElementById('subject').value;
+		const message = document.getElementById('message').value;
+		const chatId = document.getElementById('chatId').value;
+
+		const response = await fetch('/msg/telegram', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ name, email, subject, message, chatId })
+		});
+
+		if (response.ok) {
+			alert('Message sent successfully');
+		} else {
+			const errorData = await response.json();
+			alert(`Failed to send message: ${errorData.error}`);
+			console.log(errorData);
+		}
+	});
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
