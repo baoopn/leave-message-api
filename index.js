@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import xss from 'xss-clean';
 import timeout from 'connect-timeout';
+import rateLimit from "express-rate-limit";
 import fetch from 'node-fetch';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -41,6 +42,15 @@ function haltOnTimedout(req, res, next) {
     if (!req.timedout) next();
 }
 
+// Rate limiting middleware
+const apiLimiter = rateLimit({
+    windowMs: 2 * 60 * 1000, // 2 minutes
+    max: 20, // limit each IP to 10 requests per windowMs
+    handler: (req, res) => {
+        res.status(429).json({ error: 'Too many requests, please try again after 2 minutes' });
+    }
+});
+
 // Serve static files from the /static directory
 app.use(express.static(path.join(__dirname, 'static')));
 
@@ -50,7 +60,7 @@ app.get('/', haltOnTimedout, (req, res) => {
 });
 
 // POST endpoint /msg/telegram for sending via Telegram
-app.post('/msg/telegram', haltOnTimedout, async (req, res) => {
+app.post('/msg/telegram', apiLimiter, haltOnTimedout, async (req, res) => {
     let { subject, email, message, name, chatId } = req.body;
     // Construct request URL
     const requestUrl = req.get('Referer') || `${req.protocol}://${req.get('host')}${req.originalUrl}`;
