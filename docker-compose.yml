@@ -11,6 +11,9 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - PORT=${PORT}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - EMAIL_USER=${EMAIL_USER}
+      - PASSWORD=${PASSWORD}
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]
       interval: 30s
