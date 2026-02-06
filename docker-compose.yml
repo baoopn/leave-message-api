@@ -1,14 +1,19 @@
 services:
-  spotify-tokens:
-    container_name: leave-msg-app
-    image: leave-msg-app:v2.1  # You can update the version as needed
+  leave-msg-app:
+    image: leave-msg-app:latest  # You can update the version as needed
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:${PORT}"  # Map the port specified in the environment variable
+      - "${PORT}:3000"  # Map the port specified in the environment variable
     restart: always
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - PORT=${PORT}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
