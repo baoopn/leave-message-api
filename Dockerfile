@@ -1,30 +1,22 @@
-FROM node:22-alpine AS builder
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+WORKDIR /app
 
-# Create app directory
-WORKDIR /usr/src/app
+FROM base AS prod-deps
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-# Set npm timeout
-ENV NPM_CONFIG_TIMEOUT=600000
-
-# Install app dependencies
-COPY package*.json ./
-RUN npm install --omit=dev --no-fund --no-audit && npm cache clean --force
-
-# Production stage
-FROM node:22-alpine
-
-# Set environment to production
+FROM base
 ENV NODE_ENV=production
-
-# Create app directory
-WORKDIR /usr/src/app
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
 	adduser -S nodejs -u 1001
 
-# Copy dependencies from builder
-COPY --from=builder /usr/src/app/node_modules ./node_modules
+# Copy dependencies
+COPY --from=prod-deps /app/node_modules /app/node_modules
 
 # Bundle app source
 COPY --chown=nodejs:nodejs . .
