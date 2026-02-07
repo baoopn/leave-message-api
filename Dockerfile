@@ -6,7 +6,7 @@ WORKDIR /app
 
 FROM base AS prod-deps
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile
 
 FROM base
 ENV NODE_ENV=production
