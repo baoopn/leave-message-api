@@ -3,9 +3,12 @@ FROM node:22-alpine AS builder
 # Create app directory
 WORKDIR /usr/src/app
 
+# Set npm timeout
+ENV NPM_CONFIG_TIMEOUT=600000
+
 # Install app dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev --timeout=600000 --no-fund --no-audit && npm cache clean --force
+RUN npm install --omit=dev --no-fund --no-audit && npm cache clean --force
 
 # Production stage
 FROM node:22-alpine
